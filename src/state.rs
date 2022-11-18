@@ -1,14 +1,13 @@
-
 use cosmwasm_std::Addr;
 use cw_storage_plus::Item;
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, PartialEq, Debug)]
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
 pub struct Config {
     pub owner: Addr,
 }
 
-#[derive(Serialize, Deserialize, PartialEq, Debug)]
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
 pub struct ContractVersion {
     /// contract is a globally unique identifier for the contract.
     /// it should build off standard namespacing for whichever language it is in,
