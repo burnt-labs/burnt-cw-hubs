@@ -21,5 +21,11 @@ pub struct ContractVersion {
     pub version: String,
 }
 
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
+pub struct ContractMetadata {
+    pub name: String,
+    pub version: String,
+}
+
 pub const CONFIG: Item<Config> = Item::new("config");
 pub const CONTRACT_INFO: Item<ContractVersion> = Item::new("contract_info");

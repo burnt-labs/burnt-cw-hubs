@@ -52,6 +52,7 @@ thiserror = { version = "1.0.31" }
 burnt-glue = "0.2.2"
 semver = "1.0.14"
 ownable = { path = "burnt-cw-std/ownable" }
+metadata = { path = "burnt-cw-std/metadata" }
 
 [dev-dependencies]
 cw-multi-test = "0.15.1"

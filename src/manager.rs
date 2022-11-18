@@ -4,8 +4,11 @@ pub mod contract_manager {
     use thiserror::Error;
 
     use burnt_glue::manager::Manager;
+    use metadata::Metadata;
     use ownable::Ownable;
     use serde_json::{Value, Value::Object};
+
+    use crate::state::ContractMetadata;
 
     #[derive(Error, Debug)]
     pub enum ManagerError {
@@ -30,6 +33,13 @@ pub mod contract_manager {
                         let owner: Rc<RefCell<Ownable>> = Rc::new(RefCell::new(Ownable::default()));
                         contract_manager
                             .register("ownable".to_string(), owner)
+                            .unwrap();
+                    }
+                    "metadata" => {
+                        let metadata =
+                            Rc::new(RefCell::new(Metadata::<ContractMetadata>::default()));
+                        contract_manager
+                            .register("metadata".to_string(), metadata)
                             .unwrap();
                     }
                     _ => (),

@@ -80,11 +80,14 @@ pub fn migrate(deps: DepsMut, _env: Env, msg: MigrateMsg) -> Result<Response, Co
 
 #[cfg(test)]
 mod tests {
+    use crate::state::ContractMetadata;
+
     use super::*;
     use cosmwasm_std::{
         from_binary,
         testing::{mock_dependencies, mock_env, mock_info},
     };
+    use metadata::QueryResp as MetadataQueryResp;
     use ownable::QueryResp as OwnableQueryResp;
     use serde_json::json;
 
@@ -116,6 +119,41 @@ mod tests {
         match owner {
             OwnableQueryResp::IsOwner(owner) => {
                 assert_eq!(owner, true);
+            }
+        }
+    }
+
+    #[test]
+    fn test_metadata_module() {
+        let mut deps = mock_dependencies();
+        let msg = InstantiateMsg {
+            modules: json!({
+                "metadata": {"metadata": {"name": "Kenny's contract", "version": "2"}}
+            })
+            .to_string(),
+        };
+        let env = mock_env();
+        let info = mock_info(CREATOR, &[]);
+
+        let res = instantiate(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
+        assert_eq!(0, res.messages.len());
+
+        let res = query(
+            deps.as_ref(),
+            env.clone(),
+            QueryMsg::Query(json!({"metadata": {"get_metadata": {}}}).to_string()),
+        )
+        .unwrap();
+        let metadata: MetadataQueryResp<ContractMetadata> = from_binary(&res).unwrap();
+        match metadata {
+            MetadataQueryResp::Metadata(meta) => {
+                assert_eq!(
+                    meta,
+                    ContractMetadata {
+                        name: "Kenny's contract".to_string(),
+                        version: "2".to_string()
+                    }
+                );
             }
         }
     }
