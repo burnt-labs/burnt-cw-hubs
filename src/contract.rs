@@ -1,14 +1,12 @@
 #[cfg(not(feature = "library"))]
 use cosmwasm_std::{entry_point, from_slice, to_vec};
-use cosmwasm_std::{
-    Binary, Deps, DepsMut, Env, MessageInfo, Response, StdError, StdResult,
-};
+use cosmwasm_std::{Binary, Deps, DepsMut, Env, MessageInfo, Response, StdError, StdResult};
 use cw2::set_contract_version;
 use semver::Version;
 
 use crate::error::ContractError;
+use crate::manager::manager::get_manager;
 use crate::msg::{ExecuteMsg, InstantiateMsg, MigrateMsg, QueryMsg};
-use crate::manager::manager::{get_manager};
 use crate::state::Config;
 
 // version info for migration info
@@ -25,7 +23,9 @@ pub fn instantiate(
     set_contract_version(deps.storage, CONTRACT_NAME, CONTRACT_VERSION).unwrap();
     // instantiate all modules
     let mut manager = get_manager(msg.modules.clone());
-    manager.instantiate(deps, env, info, msg.modules.as_str()).unwrap();
+    manager
+        .instantiate(deps, env, info, msg.modules.as_str())
+        .unwrap();
 
     Ok(Response::default())
 }
@@ -66,9 +66,9 @@ pub fn migrate(deps: DepsMut, _env: Env, msg: MigrateMsg) -> Result<Response, Co
     }
 
     let data = deps
-    .storage
-    .get(b"config")
-    .ok_or_else(|| StdError::not_found("State"))?;
+        .storage
+        .get(b"config")
+        .ok_or_else(|| StdError::not_found("State"))?;
     let mut config: Config = from_slice(&data)?;
     config.owner = deps.api.addr_validate(&msg.owner)?;
     deps.storage.set(b"config", &to_vec(&config)?);
@@ -81,7 +81,10 @@ pub fn migrate(deps: DepsMut, _env: Env, msg: MigrateMsg) -> Result<Response, Co
 #[cfg(test)]
 mod tests {
     use super::*;
-    use cosmwasm_std::{testing::{mock_dependencies, mock_env, mock_info}, from_binary};
+    use cosmwasm_std::{
+        from_binary,
+        testing::{mock_dependencies, mock_env, mock_info},
+    };
     use ownable::QueryResp as OwnableQueryResp;
     use serde_json::json;
 
@@ -94,7 +97,8 @@ mod tests {
         let msg = InstantiateMsg {
             modules: json!({
                 "ownable": {"owner": CREATOR}
-            }).to_string(),
+            })
+            .to_string(),
         };
         let env = mock_env();
         let info = mock_info(CREATOR, &[]);
@@ -102,10 +106,15 @@ mod tests {
         let res = instantiate(deps.as_mut(), env.clone(), info.clone(), msg).unwrap();
         assert_eq!(0, res.messages.len());
 
-        let res = query(deps.as_ref(), env.clone(), QueryMsg::Query(json!({"ownable": {"is_owner": CREATOR}}).to_string())).unwrap();
+        let res = query(
+            deps.as_ref(),
+            env.clone(),
+            QueryMsg::Query(json!({"ownable": {"is_owner": CREATOR}}).to_string()),
+        )
+        .unwrap();
         let owner: OwnableQueryResp = from_binary(&res).unwrap();
         match owner {
-            OwnableQueryResp::IsOwner(owner ) => {
+            OwnableQueryResp::IsOwner(owner) => {
                 assert_eq!(owner, true);
             }
         }

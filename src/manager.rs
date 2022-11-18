@@ -1,10 +1,10 @@
 pub mod manager {
-    use std::{rc::Rc, cell::RefCell};
     use cosmwasm_std::StdError;
+    use std::{cell::RefCell, rc::Rc};
     use thiserror::Error;
 
-    use burnt_glue::{manager::Manager};
-    use ownable::{Ownable};
+    use burnt_glue::manager::Manager;
+    use ownable::Ownable;
     use serde_json::{Value, Value::Object};
 
     #[derive(Error, Debug)]
@@ -25,15 +25,15 @@ pub mod manager {
         if let Object(obj) = vals {
             let modules: Vec<(String, Value)> = obj.into_iter().collect();
             match &modules[..] {
-                [(module_name, _module)] => {
-                    match module_name.as_str() {
-                        "ownable" => {
-                            let owner: Rc<RefCell<Ownable>> = Rc::new(RefCell::new(Ownable::default()));
-                            contract_manager.register("ownable".to_string(), owner).unwrap();
-                        }
-                        _ => ()
+                [(module_name, _module)] => match module_name.as_str() {
+                    "ownable" => {
+                        let owner: Rc<RefCell<Ownable>> = Rc::new(RefCell::new(Ownable::default()));
+                        contract_manager
+                            .register("ownable".to_string(), owner)
+                            .unwrap();
                     }
-                }
+                    _ => (),
+                },
                 _ => (),
             }
         }
