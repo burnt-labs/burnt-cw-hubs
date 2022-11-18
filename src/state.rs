@@ -22,9 +22,21 @@ pub struct ContractVersion {
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
-pub struct ContractMetadata {
+pub struct SocialLinks {
     pub name: String,
-    pub version: String,
+    pub url: String
+}
+
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
+pub struct ContractMetadata {
+   pub name: String,
+   pub hub_url: String,
+   pub description: String,
+   pub tags: Vec<String>,
+   pub social_links: Vec<SocialLinks>,
+   pub creator: String,
+   pub owner: String,
+   pub image_url: String,
 }
 
 pub const CONFIG: Item<Config> = Item::new("config");

@@ -80,7 +80,7 @@ pub fn migrate(deps: DepsMut, _env: Env, msg: MigrateMsg) -> Result<Response, Co
 
 #[cfg(test)]
 mod tests {
-    use crate::state::ContractMetadata;
+    use crate::state::{ContractMetadata, SocialLinks};
 
     use super::*;
     use cosmwasm_std::{
@@ -91,7 +91,8 @@ mod tests {
     use ownable::QueryResp as OwnableQueryResp;
     use serde_json::json;
 
-    const CREATOR: &str = "creator";
+    const CREATOR: &str = "CREATOR";
+    const OWNER: &str = "OWNER";
     // make sure ownable module is instantiated
     #[test]
     fn test_ownable_module() {
@@ -126,11 +127,30 @@ mod tests {
     #[test]
     fn test_metadata_module() {
         let mut deps = mock_dependencies();
+        let metadata_msg = ContractMetadata {
+            name: "Kenny's contract".to_string(), 
+            hub_url: "find me here".to_string(),
+            description: "Awesome Hub".to_string(),
+            tags: vec!["awesome".to_string(), "wild".to_string()],
+            social_links: 
+            vec![
+                SocialLinks {
+                    name: "discord".to_string(),
+                    url: "discord link here".to_string()
+                }
+            ],
+            creator: CREATOR.to_string(),
+            owner: OWNER.to_string(),
+            image_url: "image link here".to_string()
+        };
+        let instantiate_msg = json!({
+            "metadata": {
+                "metadata": metadata_msg
+            }
+        });
         let msg = InstantiateMsg {
-            modules: json!({
-                "metadata": {"metadata": {"name": "Kenny's contract", "version": "2"}}
-            })
-            .to_string(),
+            modules: 
+            instantiate_msg.to_string(),
         };
         let env = mock_env();
         let info = mock_info(CREATOR, &[]);
@@ -149,10 +169,7 @@ mod tests {
             MetadataQueryResp::Metadata(meta) => {
                 assert_eq!(
                     meta,
-                    ContractMetadata {
-                        name: "Kenny's contract".to_string(),
-                        version: "2".to_string()
-                    }
+                    metadata_msg
                 );
             }
         }
