@@ -1,0 +1,4 @@
+[submodule "modules"]
+	path = burnt-cw-std
+	url = git@github.com:BurntFinance/burnt-cw-std.git
+	branch = module-metadata
