@@ -35,7 +35,6 @@ pub struct ContractMetadata {
    pub tags: Vec<String>,
    pub social_links: Vec<SocialLinks>,
    pub creator: String,
-   pub owner: String,
    pub image_url: String,
 }
 

@@ -140,7 +140,6 @@ mod tests {
                 }
             ],
             creator: CREATOR.to_string(),
-            owner: OWNER.to_string(),
             image_url: "image link here".to_string()
         };
         let instantiate_msg = json!({
