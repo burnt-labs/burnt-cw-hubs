@@ -5,7 +5,7 @@ use cw2::set_contract_version;
 use semver::Version;
 
 use crate::error::ContractError;
-use crate::manager::manager::get_manager;
+use crate::manager::contract_manager::get_manager;
 use crate::msg::{ExecuteMsg, InstantiateMsg, MigrateMsg, QueryMsg};
 use crate::state::Config;
 

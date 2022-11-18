@@ -1,4 +1,4 @@
-pub mod manager {
+pub mod contract_manager {
     use cosmwasm_std::StdError;
     use std::{cell::RefCell, rc::Rc};
     use thiserror::Error;
@@ -24,8 +24,8 @@ pub mod manager {
         let vals: Value = serde_json::from_str(modules.as_str()).unwrap();
         if let Object(obj) = vals {
             let modules: Vec<(String, Value)> = obj.into_iter().collect();
-            match &modules[..] {
-                [(module_name, _module)] => match module_name.as_str() {
+            for module in modules.iter() {
+                match module.0.as_str() {
                     "ownable" => {
                         let owner: Rc<RefCell<Ownable>> = Rc::new(RefCell::new(Ownable::default()));
                         contract_manager
@@ -33,10 +33,9 @@ pub mod manager {
                             .unwrap();
                     }
                     _ => (),
-                },
-                _ => (),
+                }
             }
         }
-        return contract_manager;
+        contract_manager
     }
 }
