@@ -80,7 +80,7 @@ pub fn migrate(deps: DepsMut, _env: Env, msg: MigrateMsg) -> Result<Response, Co
 
 #[cfg(test)]
 mod tests {
-    use crate::state::{ContractMetadata, SocialLinks};
+    use crate::state::{HubMetadata, SocialLinks};
 
     use super::*;
     use cosmwasm_std::{
@@ -127,7 +127,7 @@ mod tests {
     #[test]
     fn test_metadata_module() {
         let mut deps = mock_dependencies();
-        let metadata_msg = ContractMetadata {
+        let metadata_msg = HubMetadata {
             name: "Kenny's contract".to_string(), 
             hub_url: "find me here".to_string(),
             description: "Awesome Hub".to_string(),
@@ -163,7 +163,7 @@ mod tests {
             QueryMsg::Query(json!({"metadata": {"get_metadata": {}}}).to_string()),
         )
         .unwrap();
-        let metadata: MetadataQueryResp<ContractMetadata> = from_binary(&res).unwrap();
+        let metadata: MetadataQueryResp<HubMetadata> = from_binary(&res).unwrap();
         match metadata {
             MetadataQueryResp::Metadata(meta) => {
                 assert_eq!(

@@ -28,7 +28,7 @@ pub struct SocialLinks {
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
-pub struct ContractMetadata {
+pub struct HubMetadata {
    pub name: String,
    pub hub_url: String,
    pub description: String,

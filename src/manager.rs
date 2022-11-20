@@ -8,7 +8,7 @@ pub mod contract_manager {
     use ownable::Ownable;
     use serde_json::{Value, Value::Object};
 
-    use crate::state::ContractMetadata;
+    use crate::state::HubMetadata;
 
     #[derive(Error, Debug)]
     pub enum ManagerError {
@@ -37,7 +37,7 @@ pub mod contract_manager {
                     }
                     "metadata" => {
                         let metadata =
-                            Rc::new(RefCell::new(Metadata::<ContractMetadata>::default()));
+                            Rc::new(RefCell::new(Metadata::<HubMetadata>::default()));
                         contract_manager
                             .register("metadata".to_string(), metadata)
                             .unwrap();
