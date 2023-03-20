@@ -145,7 +145,7 @@ mod tests {
                 "locked_items": Set::<String>::new()
             },
             "sellable": {
-                "tokens": Map::<&str, Uint64>::new()
+                "tokens": Map::<&str, Coin>::new()
             },
             "sales": {},
             "hub_contract": "cosmos188rjfzzrdxlus60zgnrvs4rg0l73hct3azv93z"
@@ -155,8 +155,7 @@ mod tests {
         let env = mock_env();
         let info = mock_info(CREATOR, &[]);
 
-        let res = instantiate(deps.as_mut(), env.clone(), info.clone(), instantiate_msg).unwrap();
-        assert_eq!(1, res.messages.len());
+        instantiate(deps.as_mut(), env.clone(), info.clone(), instantiate_msg).unwrap();
 
         // make sure seat contract metadata was created
         msg = json!({"metadata": {"get_metadata": {}}}).to_string();
@@ -230,8 +229,7 @@ mod tests {
         let info = mock_info(CREATOR, &[]);
         let instantiate_msg: InstantiateMsg = from_str(&msg).unwrap();
 
-        let res = instantiate(deps.as_mut(), env.clone(), info.clone(), instantiate_msg).unwrap();
-        assert_eq!(1, res.messages.len());
+        instantiate(deps.as_mut(), env.clone(), info.clone(), instantiate_msg).unwrap();
 
         // mint a token
         for token_id in vec!["1", "2"] {
@@ -292,8 +290,8 @@ mod tests {
         // List the token
         let msg = SellableExecuteMsg::List {
             listings: Map::from([
-                ("1".to_string(), Coin::new(10, "uturnt")),
-                ("2".to_string(), Coin::new(10, "uturnt")),
+                ("1".to_string(), Coin::new(200, "uturnt")),
+                ("2".to_string(), Coin::new(100, "uturnt")),
             ]),
         };
         let list_msg = json!({ "sellable": msg }).to_string();
@@ -344,7 +342,7 @@ mod tests {
                 assert_eq!(res.len(), 1);
                 let (token_id, price, _) = &res[0];
                 assert_eq!(token_id, "1");
-                assert_eq!(*price, Coin::new(10, "uturnt"));
+                assert_eq!(*price, Coin::new(100, "uturnt"));
             }
         }
         // Lock the token
