@@ -6,7 +6,7 @@ use std::{cell::RefCell, rc::Rc};
 use burnt_glue::module::Module;
 use cosmwasm_std::{
     to_binary, Addr, Binary, BondedDenomResponse, Deps, DepsMut, Empty, Env, MessageInfo, Order,
-    QueryRequest, Response, StakingQuery, StdResult, Uint64,
+    QueryRequest, Response, StakingQuery, StdResult, Uint64, Coin,
 };
 use cw721::Cw721Query;
 use cw721_base::state::TokenInfo;
@@ -104,7 +104,7 @@ impl<'a> SeatModules<'a, SeatMetadata, TokenMetadata> {
         // instantiate all modules
 
         // ownable module
-        let ownable = Ownable::default();
+        let ownable = ownable::Ownable::default();
 
         let borrowable_ownable = Rc::new(RefCell::new(ownable));
         // metadata module
@@ -192,7 +192,7 @@ impl<'a> SeatModules<'a, SeatMetadata, TokenMetadata> {
                     &env,
                     &info,
                     sellable::msg::InstantiateMsg {
-                        tokens: schemars::Map::<String, Uint64>::new(),
+                        tokens: schemars::Map::<String, Coin>::new(),
                     },
                 )
                 .map_err(|err| ContractError::SellableError(err))?;

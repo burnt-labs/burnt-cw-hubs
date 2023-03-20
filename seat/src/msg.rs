@@ -1,5 +1,5 @@
 use cosmwasm_schema::cw_serde;
-use cosmwasm_std::{Addr, Empty, Uint64};
+use cosmwasm_std::{Addr, Empty, Uint64, Coin};
 use cw721_base::state::Approval;
 use serde::{Deserialize, Serialize};
 
@@ -48,7 +48,7 @@ pub enum QueryMsg {
 #[cw_serde]
 pub struct SeatInfo {
     pub token_id: String,
-    pub listed_price: Option<Uint64>,
+    pub listed_price: Option<Coin>,
     pub owner: Addr,
     pub approvals: Vec<Approval>,
     pub token_uri: Option<String>,

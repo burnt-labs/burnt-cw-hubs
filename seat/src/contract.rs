@@ -292,8 +292,8 @@ mod tests {
         // List the token
         let msg = SellableExecuteMsg::List {
             listings: Map::from([
-                ("1".to_string(), Uint64::new(200)),
-                ("2".to_string(), Uint64::new(100)),
+                ("1".to_string(), Coin::new(10, "uturnt")),
+                ("2".to_string(), Coin::new(10, "uturnt")),
             ]),
         };
         let list_msg = json!({ "sellable": msg }).to_string();
@@ -344,7 +344,7 @@ mod tests {
                 assert_eq!(res.len(), 1);
                 let (token_id, price, _) = &res[0];
                 assert_eq!(token_id, "1");
-                assert_eq!(price, Uint64::new(200));
+                assert_eq!(*price, Coin::new(10, "uturnt"));
             }
         }
         // Lock the token
