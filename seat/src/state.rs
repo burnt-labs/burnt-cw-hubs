@@ -1,15 +1,12 @@
 use cosmwasm_schema::cw_serde;
 
-use std::ops::Deref;
 use std::{cell::RefCell, rc::Rc};
 
 use burnt_glue::module::Module;
 use cosmwasm_std::{
-    to_binary, Addr, Binary, BondedDenomResponse, Deps, DepsMut, Empty, Env, MessageInfo, Order,
-    QueryRequest, Response, StakingQuery, StdResult, Uint64, Coin,
+    to_binary, Addr, Binary, BondedDenomResponse, Coin, Deps, DepsMut, Empty, Env, MessageInfo,
+    Order, QueryRequest, Response, StakingQuery, StdResult,
 };
-use cw721::Cw721Query;
-use cw721_base::state::TokenInfo;
 use cw_storage_plus::{Item, Map};
 use ownable::Ownable;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};

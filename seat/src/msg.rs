@@ -1,5 +1,5 @@
 use cosmwasm_schema::cw_serde;
-use cosmwasm_std::{Addr, Empty, Uint64, Coin};
+use cosmwasm_std::{Addr, Coin, Empty};
 use cw721_base::state::Approval;
 use serde::{Deserialize, Serialize};
 

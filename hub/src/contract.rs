@@ -71,7 +71,7 @@ pub fn migrate(deps: DepsMut, _env: Env, msg: MigrateMsg) -> Result<Response, Co
 
 #[cfg(test)]
 mod tests {
-    use crate::state::{HubMetadata, MetadataField, SocialLinks};
+    use crate::state::{HubMetadata, SocialLinks};
 
     use super::*;
     use cosmwasm_std::{
@@ -80,7 +80,7 @@ mod tests {
     };
     use metadata::QueryResp as MetadataQueryResp;
     use ownable::QueryResp as OwnableQueryResp;
-    use serde_json::{from_str, json, to_string};
+    use serde_json::{from_str, json};
 
     const CREATOR: &str = "CREATOR";
     // make sure ownable module is instantiated
