@@ -240,7 +240,7 @@ impl<'a> SeatModules<'a, SeatMetadata, TokenMetadata> {
                 .execute(&mut mut_deps, env, info, msg)
                 .map_err(|err| ContractError::SalesError(err)),
         };
-        result.map(|r| r.into())
+        result.map(|r| r.response)
     }
 
     pub fn query(&self, deps: Deps, env: Env, msg: QueryMsg) -> StdResult<Binary> {
