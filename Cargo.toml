@@ -24,3 +24,11 @@ token = { git = "https://github.com/burnt-labs/burnt-cw-std" }
 sellable = { git = "https://github.com/burnt-labs/burnt-cw-std" }
 redeemable = { git = "https://github.com/burnt-labs/burnt-cw-std" }
 sales = { git = "https://github.com/burnt-labs/burnt-cw-std" }
+
+[patch.crates-io]
+ownable = { git = "https://github.com/burnt-labs/burnt-cw-std" }
+metadata = { git = "https://github.com/burnt-labs/burnt-cw-std" }
+token = { git = "https://github.com/burnt-labs/burnt-cw-std" }
+sellable = { git = "https://github.com/burnt-labs/burnt-cw-std" }
+redeemable = { git = "https://github.com/burnt-labs/burnt-cw-std" }
+sales = { git = "https://github.com/burnt-labs/burnt-cw-std" }
