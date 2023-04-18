@@ -28,8 +28,8 @@ jobs:
       - name: Upload optimized wasm
         uses: svenstaro/upload-release-action@v2
         with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: ./artifacts/*.wasm
+          repo_token: ${{ github.token }}
+          file: ./target/wasm32-unknown-unknown/release/*.wasm
           tag: ${{ github.ref }}
           overwrite: true
           file_glob: true
