@@ -7,7 +7,7 @@ use semver::Version;
 
 use crate::error::ContractError;
 use crate::msg::{ExecuteMsg, InstantiateMsg, QueryMsg};
-use crate::state::{Config, SeatModules, HUB_CONTRACT, CONFIG};
+use crate::state::{Config, SeatModules, CONFIG, HUB_CONTRACT};
 
 // version info for migration info
 const CONTRACT_NAME: &str = "crates.io:seat";
