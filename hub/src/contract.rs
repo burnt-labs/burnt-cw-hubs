@@ -113,16 +113,16 @@ mod tests {
         let env = mock_env();
         let info = mock_info(CREATOR, &[]);
 
-        let res = instantiate(deps.as_mut(), env.clone(), info.clone(), instantiate_msg).unwrap();
+        let res = instantiate(deps.as_mut(), env.clone(), info, instantiate_msg).unwrap();
         assert_eq!(0, res.messages.len());
 
         msg = json!({"ownable": {"is_owner": CREATOR}}).to_string();
         let query_msg: QueryMsg = from_str(&msg).unwrap();
-        let res = query(deps.as_ref(), env.clone(), query_msg).unwrap();
+        let res = query(deps.as_ref(), env, query_msg).unwrap();
         let owner: OwnableQueryResp = from_binary(&res).unwrap();
         match owner {
             OwnableQueryResp::IsOwner(owner) => {
-                assert_eq!(owner, true);
+                assert!(owner);
             }
         }
     }
@@ -158,12 +158,12 @@ mod tests {
         let env = mock_env();
         let info = mock_info(CREATOR, &[]);
 
-        let res = instantiate(deps.as_mut(), env.clone(), info.clone(), instantiate_msg).unwrap();
+        let res = instantiate(deps.as_mut(), env.clone(), info, instantiate_msg).unwrap();
         assert_eq!(0, res.messages.len());
 
         msg = json!({"metadata": {"get_metadata": {}}}).to_string();
         let query_msg: QueryMsg = from_str(&msg).unwrap();
-        let res = query(deps.as_ref(), env.clone(), query_msg).unwrap();
+        let res = query(deps.as_ref(), env, query_msg).unwrap();
         let metadata: MetadataQueryResp<HubMetadata> = from_binary(&res).unwrap();
         match metadata {
             MetadataQueryResp::Metadata(meta) => {

@@ -112,7 +112,7 @@ impl<'a> SeatModules<'a, SeatMetadata, TokenMetadata> {
         // Burnt token module
         let seat_token = Tokens::<TokenMetadata, Empty, Empty, Empty>::new(
             cw721_base::Cw721Contract::default(),
-            Some(bond_denom.to_string()),
+            Some(bond_denom),
         );
         let borrowable_seat_token = Rc::new(RefCell::new(seat_token));
         // Redeemable token
@@ -153,34 +153,34 @@ impl<'a> SeatModules<'a, SeatMetadata, TokenMetadata> {
         self.ownable
             .borrow_mut()
             .instantiate(&mut mut_deps.branch(), &env, &info, msg.ownable.clone())
-            .map_err(|err| ContractError::OwnableError(err))?;
+            .map_err(ContractError::OwnableError)?;
 
         // metadata module
         self.metadata
             .instantiate(&mut mut_deps.branch(), &env, &info, msg.metadata.clone())
-            .map_err(|err| ContractError::MetadataError(err))?;
+            .map_err(ContractError::MetadataError)?;
 
         // Burnt token module
         self.seat_token
             .borrow_mut()
             .instantiate(&mut mut_deps.branch(), &env, &info, msg.seat_token.clone())
-            .map_err(|err| ContractError::SeatTokenError(err))?;
+            .map_err(ContractError::SeatTokenError)?;
 
         // Redeemable token
         self.redeemable
             .instantiate(&mut mut_deps.branch(), &env, &info, msg.redeemable.clone())
-            .map_err(|err| ContractError::RedeemableError(err))?;
+            .map_err(ContractError::RedeemableError)?;
 
         self.sales
             .instantiate(&mut mut_deps.branch(), &env, &info, msg.sales.clone())
-            .map_err(|err| ContractError::SalesError(err))?;
+            .map_err(ContractError::SalesError)?;
 
         // Sellable token
         if let Some(sellable_items) = &msg.sellable {
             self.sellable_token
                 .borrow_mut()
                 .instantiate(&mut mut_deps.branch(), &env, &info, sellable_items.clone())
-                .map_err(|err| ContractError::SellableError(err))?;
+                .map_err(ContractError::SellableError)?;
         } else {
             self.sellable_token
                 .borrow_mut()
@@ -192,7 +192,7 @@ impl<'a> SeatModules<'a, SeatMetadata, TokenMetadata> {
                         tokens: schemars::Map::<String, Coin>::new(),
                     },
                 )
-                .map_err(|err| ContractError::SellableError(err))?;
+                .map_err(ContractError::SellableError)?;
         }
 
         Ok(Response::default())
@@ -211,34 +211,34 @@ impl<'a> SeatModules<'a, SeatMetadata, TokenMetadata> {
                 .ownable
                 .borrow_mut()
                 .execute(&mut mut_deps, env, info, msg)
-                .map_err(|err| ContractError::OwnableError(err)),
+                .map_err(ContractError::OwnableError),
 
             ExecuteMsg::Metadata(msg) => self
                 .metadata
                 .execute(&mut mut_deps, env, info, msg)
-                .map_err(|err| ContractError::MetadataError(err)),
+                .map_err(ContractError::MetadataError),
 
             ExecuteMsg::SeatToken(msg) => self
                 .seat_token
                 .borrow_mut()
                 .execute(&mut mut_deps, env, info, msg)
-                .map_err(|err| ContractError::SeatTokenError(err)),
+                .map_err(ContractError::SeatTokenError),
 
             ExecuteMsg::Redeemable(msg) => self
                 .redeemable
                 .execute(&mut mut_deps, env, info, msg)
-                .map_err(|err| ContractError::RedeemableError(err)),
+                .map_err(ContractError::RedeemableError),
 
             ExecuteMsg::Sellable(msg) => self
                 .sellable_token
                 .borrow_mut()
                 .execute(&mut mut_deps, env, info, msg)
-                .map_err(|err| ContractError::SellableError(err)),
+                .map_err(ContractError::SellableError),
 
             ExecuteMsg::Sales(msg) => self
                 .sales
                 .execute(&mut mut_deps, env, info, msg)
-                .map_err(|err| ContractError::SalesError(err)),
+                .map_err(ContractError::SalesError),
         };
         result.map(|r| r.response)
     }

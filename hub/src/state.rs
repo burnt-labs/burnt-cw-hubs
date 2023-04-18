@@ -68,7 +68,7 @@ impl<'a> HubMetadata {
             ..self
         };
 
-        return modules
+        modules
             .metadata
             .execute(
                 deps,
@@ -76,8 +76,8 @@ impl<'a> HubMetadata {
                 info,
                 metadata::ExecuteMsg::SetMetadata(new_metadata),
             )
-            .map_err(|err| ContractError::MetadataError(err))
-            .map(|_| Response::default());
+            .map_err(ContractError::MetadataError)
+            .map(|_| Response::default())
     }
 }
 pub struct HubModules<'a, T>
@@ -129,11 +129,11 @@ impl<'a> HubModules<'a, HubMetadata> {
 
         self.ownable
             .instantiate(&mut mut_deps.branch(), &env, &info, msg.ownable)
-            .map_err(|err| ContractError::OwnableError(err))?;
+            .map_err(ContractError::OwnableError)?;
 
         self.metadata
             .instantiate(&mut mut_deps.branch(), &env, &info, msg.metadata)
-            .map_err(|err| ContractError::MetadataError(err))?;
+            .map_err(ContractError::MetadataError)?;
         Ok(Response::default())
     }
 
@@ -149,7 +149,7 @@ impl<'a> HubModules<'a, HubMetadata> {
             ExecuteMsg::Ownable(msg) => self
                 .ownable
                 .execute(&mut mut_deps, env, info, msg)
-                .map_err(|err| ContractError::OwnableError(err))
+                .map_err(ContractError::OwnableError)
                 .map(|_| Response::default()),
 
             ExecuteMsg::UpdateMetadata(meta_field) => {
@@ -180,18 +180,18 @@ impl<'a> HubModules<'a, HubMetadata> {
     pub fn query(&self, deps: Deps, env: Env, msg: QueryMsg) -> StdResult<Binary> {
         match msg {
             QueryMsg::Ownable(query_msg) => {
-                return self
+                self
                     .ownable
                     .query(&deps, env, query_msg)
                     .map(|res| to_binary(&res))
-                    .unwrap();
+                    .unwrap()
             }
             QueryMsg::Metadata(query_msg) => {
-                return self
+                self
                     .metadata
                     .query(&deps, env, query_msg)
                     .map(|res| to_binary(&res))
-                    .unwrap();
+                    .unwrap()
             }
         }
     }
