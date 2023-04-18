@@ -179,20 +179,16 @@ impl<'a> HubModules<'a, HubMetadata> {
 
     pub fn query(&self, deps: Deps, env: Env, msg: QueryMsg) -> StdResult<Binary> {
         match msg {
-            QueryMsg::Ownable(query_msg) => {
-                self
-                    .ownable
-                    .query(&deps, env, query_msg)
-                    .map(|res| to_binary(&res))
-                    .unwrap()
-            }
-            QueryMsg::Metadata(query_msg) => {
-                self
-                    .metadata
-                    .query(&deps, env, query_msg)
-                    .map(|res| to_binary(&res))
-                    .unwrap()
-            }
+            QueryMsg::Ownable(query_msg) => self
+                .ownable
+                .query(&deps, env, query_msg)
+                .map(|res| to_binary(&res))
+                .unwrap(),
+            QueryMsg::Metadata(query_msg) => self
+                .metadata
+                .query(&deps, env, query_msg)
+                .map(|res| to_binary(&res))
+                .unwrap(),
         }
     }
 }

@@ -573,8 +573,7 @@ mod tests {
         })
         .to_string();
         let execute_msg: ExecuteMsg = from_str(&json_exec_msg).unwrap();
-        execute(deps.as_mut(), env.clone(), info, execute_msg)
-            .expect("any ongoing sale halted");
+        execute(deps.as_mut(), env.clone(), info, execute_msg).expect("any ongoing sale halted");
 
         let active_primary_sale_query = query(
             deps.as_ref(),
