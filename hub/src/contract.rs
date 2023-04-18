@@ -19,10 +19,12 @@ pub fn instantiate(
     info: MessageInfo,
     msg: InstantiateMsg,
 ) -> Result<Response, ContractError> {
-    set_contract_version(deps.storage, CONTRACT_NAME, CONTRACT_VERSION).unwrap();
+    let mut mut_deps = Box::new(deps);
     // instantiate all modules
     let mut modules = HubModules::default();
-    modules.instantiate(deps, env, info, msg)
+    let res = modules.instantiate(mut_deps.branch(), env, info, msg);
+    set_contract_version(mut_deps.storage, CONTRACT_NAME, CONTRACT_VERSION).unwrap();
+    res
 }
 
 #[cfg_attr(not(feature = "library"), entry_point)]

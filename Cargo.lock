@@ -518,7 +518,7 @@ dependencies = [
 
 [[package]]
 name = "hub"
-version = "0.2.0"
+version = "0.1.0"
 dependencies = [
  "burnt-glue",
  "cosmwasm-schema",
@@ -762,7 +762,7 @@ dependencies = [
 
 [[package]]
 name = "seat"
-version = "0.2.0"
+version = "0.1.0"
 dependencies = [
  "burnt-glue",
  "cosmwasm-schema",

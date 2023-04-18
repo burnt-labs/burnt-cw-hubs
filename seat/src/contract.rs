@@ -7,7 +7,7 @@ use semver::Version;
 
 use crate::error::ContractError;
 use crate::msg::{ExecuteMsg, InstantiateMsg, QueryMsg};
-use crate::state::{Config, SeatModules, HUB_CONTRACT};
+use crate::state::{Config, SeatModules, HUB_CONTRACT, CONFIG};
 
 // version info for migration info
 const CONTRACT_NAME: &str = "crates.io:seat";
@@ -25,13 +25,15 @@ pub fn instantiate(
     info: MessageInfo,
     msg: InstantiateMsg,
 ) -> Result<Response, ContractError> {
-    set_contract_version(deps.storage, CONTRACT_NAME, CONTRACT_VERSION).unwrap();
-
-    let hub_contract = deps.api.addr_validate(&msg.hub_contract)?;
-    HUB_CONTRACT.save(deps.storage, &hub_contract)?;
+    let mut mut_deps = Box::new(deps);
+    let hub_contract = mut_deps.branch().api.addr_validate(&msg.hub_contract)?;
+    HUB_CONTRACT.save(mut_deps.storage, &hub_contract)?;
     // instantiate all modules
-    let mut modules = SeatModules::new(deps.as_ref());
-    modules.instantiate(deps, env.clone(), info, &msg)
+    let mut modules = SeatModules::new(mut_deps.branch().as_ref());
+    let res = modules.instantiate(mut_deps.branch(), env.clone(), info.clone(), &msg);
+    set_contract_version(mut_deps.storage, CONTRACT_NAME, CONTRACT_VERSION).unwrap();
+    CONFIG.save(mut_deps.storage, &Config { owner: info.sender })?;
+    res
 }
 
 #[cfg_attr(not(feature = "library"), entry_point)]
