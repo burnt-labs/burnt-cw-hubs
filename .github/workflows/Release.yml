@@ -22,11 +22,11 @@ jobs:
           args: optimize
       - name: Get release ID
         id: get_release
-        uses: bruceadams/get-release@v1.3.2
+        uses: bruceadams/get-release@v1.2.3
         env:
           GITHUB_TOKEN: ${{ github.token }}
       - name: Upload optimized wasm
-        uses: svenstaro/upload-release-action@v2.5.0
+        uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ github.token }}
           file: ./target/wasm32-unknown-unknown/release/*.wasm
