@@ -56,3 +56,7 @@ metadata = { workspace = true }
 
 [dev-dependencies]
 cw-multi-test = "0.15.1"
+[dev-dependencies.cargo-husky]
+version = "1"
+default-features = false # Disable features which are enabled by default
+features = ["precommit-hook", "run-cargo-test", "run-cargo-fmt", "run-cargo-clippy"]
