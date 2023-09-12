@@ -23,6 +23,7 @@ pub fn instantiate(
     // instantiate all modules
     let mut modules = HubModules::default();
     let res = modules.instantiate(mut_deps.branch(), env, info, msg);
+    // we are setting the contract version lastly to override any stored version by the modules or external contracts
     set_contract_version(mut_deps.storage, CONTRACT_NAME, CONTRACT_VERSION).unwrap();
     res
 }

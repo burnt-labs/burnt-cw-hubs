@@ -18,17 +18,19 @@ burnt-glue = "0.2.2"
 semver = "1.0.14"
 cw721 = "0.16.0"
 cw721-base = { version = "0.16.0", features = ["library"] }
-ownable = { git = "https://github.com/burnt-labs/burnt-cw-std" }
-metadata = { git = "https://github.com/burnt-labs/burnt-cw-std" }
-token = { git = "https://github.com/burnt-labs/burnt-cw-std" }
-sellable = { git = "https://github.com/burnt-labs/burnt-cw-std" }
-redeemable = { git = "https://github.com/burnt-labs/burnt-cw-std" }
-sales = { git = "https://github.com/burnt-labs/burnt-cw-std" }
+allowable = { git = "https://github.com/burnt-labs/burnt-cw-std"}
+ownable = { git = "https://github.com/burnt-labs/burnt-cw-std"}
+metadata = { git = "https://github.com/burnt-labs/burnt-cw-std"}
+token = { git = "https://github.com/burnt-labs/burnt-cw-std"}
+sellable = { git = "https://github.com/burnt-labs/burnt-cw-std"}
+redeemable = { git = "https://github.com/burnt-labs/burnt-cw-std"}
+sales = { git = "https://github.com/burnt-labs/burnt-cw-std"}
 
 [patch.crates-io]
-ownable = { git = "https://github.com/burnt-labs/burnt-cw-std" }
-metadata = { git = "https://github.com/burnt-labs/burnt-cw-std" }
-token = { git = "https://github.com/burnt-labs/burnt-cw-std" }
-sellable = { git = "https://github.com/burnt-labs/burnt-cw-std" }
-redeemable = { git = "https://github.com/burnt-labs/burnt-cw-std" }
-sales = { git = "https://github.com/burnt-labs/burnt-cw-std" }
+allowable = { git = "https://github.com/burnt-labs/burnt-cw-std"}
+ownable = { git = "https://github.com/burnt-labs/burnt-cw-std"}
+metadata = { git = "https://github.com/burnt-labs/burnt-cw-std"}
+token = { git = "https://github.com/burnt-labs/burnt-cw-std"}
+sellable = { git = "https://github.com/burnt-labs/burnt-cw-std"}
+redeemable = { git = "https://github.com/burnt-labs/burnt-cw-std"}
+sales = { git = "https://github.com/burnt-labs/burnt-cw-std"}

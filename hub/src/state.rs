@@ -2,7 +2,10 @@ use std::{cell::RefCell, rc::Rc};
 
 use burnt_glue::module::Module;
 use cosmwasm_schema::cw_serde;
-use cosmwasm_std::{to_binary, Addr, Binary, Deps, DepsMut, Env, MessageInfo, Response, StdResult};
+use cosmwasm_std::{
+    to_binary, Addr, Binary, CosmosMsg, Deps, DepsMut, Env, Event, MessageInfo, Response,
+    StdResult, SubMsg,
+};
 use cw_storage_plus::Item;
 use ownable::Ownable;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
@@ -48,7 +51,7 @@ impl<'a> HubMetadata {
         env: Env,
         info: MessageInfo,
         address: &str,
-    ) -> Result<Response, ContractError> {
+    ) -> Result<burnt_glue::response::Response, ContractError> {
         let new_metadata = HubMetadata {
             seat_contract: Some(deps.api.addr_validate(address)?),
             ..self
@@ -63,7 +66,6 @@ impl<'a> HubMetadata {
                 metadata::ExecuteMsg::SetMetadata(new_metadata),
             )
             .map_err(ContractError::MetadataError)
-            .map(|_| Response::default()) // convert the glue result into a cosmwasm_std response
     }
 }
 pub struct HubModules<'a, T>
@@ -113,14 +115,21 @@ impl<'a> HubModules<'a, HubMetadata> {
         // Instantiate all modules
         let mut mut_deps = Box::new(deps);
 
-        self.ownable
+        let mut response = Response::new().add_event(
+            Event::new("hub-instantiate")
+                .add_attribute("contract_address", env.contract.address.to_string()),
+        );
+        let ownable_response = self
+            .ownable
             .instantiate(&mut mut_deps.branch(), &env, &info, msg.ownable)
             .map_err(ContractError::OwnableError)?;
 
-        self.metadata
+        let metadata_response = self
+            .metadata
             .instantiate(&mut mut_deps.branch(), &env, &info, msg.metadata)
             .map_err(ContractError::MetadataError)?;
-        Ok(Response::default())
+        merge_responses(&mut response, vec![ownable_response, metadata_response]);
+        Ok(response)
     }
 
     pub fn execute(
@@ -131,12 +140,11 @@ impl<'a> HubModules<'a, HubMetadata> {
         msg: ExecuteMsg,
     ) -> Result<Response, ContractError> {
         let mut mut_deps = Box::new(deps);
-        match msg {
+        let response = match msg {
             ExecuteMsg::Ownable(msg) => self
                 .ownable
                 .execute(&mut mut_deps, env, info, msg)
-                .map_err(ContractError::OwnableError)
-                .map(|_| Response::default()),
+                .map_err(ContractError::OwnableError),
 
             ExecuteMsg::UpdateMetadata(meta_field) => {
                 // get previous metadata
@@ -160,7 +168,12 @@ impl<'a> HubModules<'a, HubMetadata> {
                     },
                 }
             }
-        }
+        };
+        response.map(|r| {
+            let mut res = Response::new();
+            merge_responses(&mut res, vec![r]);
+            res
+        })
     }
 
     pub fn query(&self, deps: Deps, env: Env, msg: QueryMsg) -> StdResult<Binary> {
@@ -177,4 +190,28 @@ impl<'a> HubModules<'a, HubMetadata> {
                 .unwrap(),
         }
     }
+}
+
+/// This function takes an array of responses and merges them into the main_response.
+/// It is used to merge the responses from the modules into one response
+/// Combining all the events and attributes into one response and messages and data into one
+fn merge_responses(
+    main_response: &mut Response,
+    responses: Vec<burnt_glue::response::Response>,
+) -> &mut Response {
+    // let mut main_response = main_response.clone();
+    for response in responses {
+        // we only care about bank messages for now
+        for message in &response.response.messages {
+            if let CosmosMsg::Bank(msg) = &message.msg {
+                main_response.messages.push(SubMsg::new(msg.clone()));
+            }
+        }
+
+        main_response
+            .attributes
+            .extend(response.response.attributes);
+        main_response.events.extend(response.response.events);
+    }
+    main_response
 }

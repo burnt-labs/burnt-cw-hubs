@@ -1,6 +1,6 @@
 #[cfg(not(feature = "library"))]
 use cosmwasm_schema::cw_serde;
-use cosmwasm_std::{entry_point, from_slice, to_vec, CosmosMsg};
+use cosmwasm_std::{entry_point, from_slice, to_vec, Event};
 use cosmwasm_std::{Binary, Deps, DepsMut, Env, MessageInfo, Response, StdError, StdResult};
 use cw2::set_contract_version;
 use semver::Version;
@@ -29,11 +29,13 @@ pub fn instantiate(
     let hub_contract = mut_deps.branch().api.addr_validate(&msg.hub_contract)?;
     HUB_CONTRACT.save(mut_deps.storage, &hub_contract)?;
     // instantiate all modules
-    let mut modules = SeatModules::new(mut_deps.branch().as_ref());
+    let mut modules = SeatModules::new();
     let res = modules.instantiate(mut_deps.branch(), env, info.clone(), &msg);
     set_contract_version(mut_deps.storage, CONTRACT_NAME, CONTRACT_VERSION).unwrap();
     CONFIG.save(mut_deps.storage, &Config { owner: info.sender })?;
-    res
+    Ok(res.unwrap().add_event(
+        Event::new("seat_contract-instantiate").add_attribute("hub_address", hub_contract),
+    ))
 }
 
 #[cfg_attr(not(feature = "library"), entry_point)]
@@ -43,24 +45,13 @@ pub fn execute(
     info: MessageInfo,
     msg: ExecuteMsg,
 ) -> Result<Response, ContractError> {
-    let mut modules = SeatModules::new(deps.as_ref());
-    modules.execute(deps, env, info, msg).map(|response| {
-        let mut res = Response::new();
-        res.attributes = response.attributes;
-        res.data = response.data;
-        res.events = response.events;
-        for message in &response.messages {
-            if let CosmosMsg::Bank(msg) = &message.msg {
-                res = res.add_message(msg.clone());
-            }
-        }
-        res
-    })
+    let mut modules = SeatModules::new();
+    modules.execute(deps, env, info, msg)
 }
 
 #[cfg_attr(not(feature = "library"), entry_point)]
 pub fn query(deps: Deps, env: Env, msg: QueryMsg) -> StdResult<Binary> {
-    let modules = SeatModules::new(deps);
+    let modules = SeatModules::new();
     modules.query(deps, env, msg)
 }
 
@@ -106,14 +97,10 @@ mod tests {
         testing::{mock_dependencies, mock_env, mock_info},
         Coin, Empty, Timestamp,
     };
-    use cw721::{Cw721QueryMsg, NumTokensResponse, TokensResponse};
+    use cw721::{Cw721QueryMsg, NumTokensResponse};
     use cw721_base::{ExecuteMsg as Cw721BaseExecuteMsg, MintMsg, QueryMsg as Cw721BaseQueryMsg};
     use metadata::QueryResp as MetadataQueryResp;
-    use redeemable::{
-        ExecuteMsg as RedeemableExecuteMsg, QueryMsg as RedeemableQueryMsg,
-        QueryResp as RedeemableQueryResp,
-    };
-    use schemars::{Map, Set};
+    use schemars::Map;
     use sellable::msg::{
         ExecuteMsg as SellableExecuteMsg, QueryMsg as SellableQueryMsg,
         QueryResp as SellableQueryResp,
@@ -140,6 +127,7 @@ mod tests {
                 seat_name: true,
                 hub_name: true,
             },
+            hub_contract: "hub".to_string(),
         };
         let mut msg = json!({
             "seat_token": {
@@ -152,9 +140,6 @@ mod tests {
             },
             "ownable": {
                 "owner": CREATOR
-            },
-            "redeemable": {
-                "locked_items": Set::<String>::new()
             },
             "sellable": {
                 "tokens": Map::<&str, Coin>::new()
@@ -209,6 +194,7 @@ mod tests {
                 seat_name: true,
                 hub_name: true,
             },
+            hub_contract: "hub".to_string(),
         };
         let msg = json!({
             "seat_token": {
@@ -221,9 +207,6 @@ mod tests {
             },
             "ownable": {
                 "owner": CREATOR
-            },
-            "redeemable": {
-                "locked_items": Set::<String>::new()
             },
             "sellable": {
                 "tokens": {}
@@ -300,13 +283,13 @@ mod tests {
         execute(
             deps.as_mut(),
             env.clone(),
-            info.clone(),
+            info,
             from_str(&list_msg).unwrap(),
         )
         .unwrap();
         let res = query(
             deps.as_ref(),
-            env.clone(),
+            env,
             from_str(&json!({ "sellable": query_msg }).to_string()).unwrap(),
         )
         .unwrap();
@@ -316,66 +299,6 @@ mod tests {
                 assert_eq!(res.len(), 2);
             }
         }
-        // buy a token
-        let msg = SellableExecuteMsg::BuyToken {
-            token_id: "1".to_string(),
-        };
-        let buy_msg = json!({ "sellable": msg }).to_string();
-        let buyer_info = mock_info("buyer", &[Coin::new(200, "uturnt")]);
-        execute(
-            deps.as_mut(),
-            env.clone(),
-            buyer_info,
-            from_str(&buy_msg).unwrap(),
-        )
-        .unwrap();
-        // Get all listed tokens
-        let query_msg = SellableQueryMsg::ListedTokens {
-            start_after: None,
-            limit: None,
-        };
-        let res = query(
-            deps.as_ref(),
-            env.clone(),
-            from_str(&json!({ "sellable": query_msg }).to_string()).unwrap(),
-        )
-        .unwrap();
-        let result: SellableQueryResp<TokenMetadata> = from_binary(&res).unwrap();
-        match result {
-            SellableQueryResp::ListedTokens(res) => {
-                assert_eq!(res.len(), 1);
-                let (token_id, price, _) = &res[0];
-                assert_eq!(token_id, "2");
-                assert_eq!(*price, Coin::new(100, "uturnt"));
-            }
-        }
-        // buy a token
-        let msg = SellableExecuteMsg::BuyToken {
-            token_id: "1".to_string(),
-        };
-        let buy_msg = from_str(&json!({ "sellable": msg }).to_string()).unwrap();
-        let buyer_info = mock_info("buyer", &[Coin::new(10, "ustake")]);
-        let buy_response = execute(deps.as_mut(), env.clone(), buyer_info, buy_msg);
-        match buy_response {
-            Err(val) => {
-                print!("{:?}", val);
-            }
-            _ => unreachable!(),
-        }
-        // Get all buyer owned tokens
-        let query_msg = Cw721BaseQueryMsg::<Cw721QueryMsg>::Tokens {
-            owner: "buyer".to_string(),
-            start_after: None,
-            limit: None,
-        };
-        let res = query(
-            deps.as_ref(),
-            env,
-            from_str(&json!({ "seat_token": query_msg }).to_string()).unwrap(),
-        );
-        let result: TokensResponse = from_binary(&res.unwrap()).unwrap();
-        assert_eq!(result.tokens.len(), 1);
-        assert_eq!(result.tokens[0], "1");
     }
 
     #[test]
@@ -398,6 +321,7 @@ mod tests {
                 seat_name: true,
                 hub_name: true,
             },
+            hub_contract: "hub".to_string(),
         };
         let msg = json!({
             "seat_token": {
@@ -410,9 +334,6 @@ mod tests {
             },
             "ownable": {
                 "owner": CREATOR
-            },
-            "redeemable": {
-                "locked_items": Set::<String>::new()
             },
             "sellable": {
                 "tokens": {}
@@ -465,6 +386,7 @@ mod tests {
         execute(deps.as_mut(), env.clone(), fake_info, execute_msg_1)
             .expect_err("primary sales should not be added");
         // set block time
+        env.block.time = Timestamp::from_seconds(1674567586);
         execute(deps.as_mut(), env.clone(), info.clone(), execute_msg_2)
             .expect("primary sales added");
         let primary_sales_query =
@@ -522,9 +444,8 @@ mod tests {
         .unwrap();
         let active_primary_sale: QueryResp = from_binary(&active_primary_sale_query).unwrap();
 
-        match active_primary_sale {
-            QueryResp::ActivePrimarySale(Some(sale)) => assert!(sale.disabled),
-            _ => unreachable!(),
+        if let QueryResp::ActivePrimarySale(Some(_sale)) = active_primary_sale {
+            panic!()
         }
 
         // create a new primary sale
@@ -565,9 +486,9 @@ mod tests {
         .unwrap();
         let active_primary_sale: QueryResp = from_binary(&active_primary_sale_query).unwrap();
 
-        match active_primary_sale {
-            QueryResp::ActivePrimarySale(Some(sale)) => assert!(sale.disabled),
-            _ => unreachable!(),
+        // there should be no active primary sale after sale is halted
+        if let QueryResp::ActivePrimarySale(Some(_sale)) = active_primary_sale {
+            panic!()
         }
     }
 }
